@@ -1,0 +1,62 @@
+TO DO:
+    - move databse.py, config.py to generic core folder in app: like app/code/database.py, app/code/config.py and then import it in respective modules. [Done]
+    - use -> from app.core.config import BASE_DIR everywhere.
+
+Learnings:
+    Q: Why scripts not inside app/ folder?
+    A: Because scripts are not part of runtime application code. They are used for development, testing, or deployment purposes. Keeping them outside of the app/ folder helps to maintain a clear separation between the application code and the supporting scripts, making the project structure cleaner and more organized.
+        - APP can be treated as package and everything inside app/ is considered runtime application code.
+
+My Teams & projects:
+    - Data Engineering:
+        - App side: Data pull from different sources inclusing social media platform and others like wether data, Third party UI data
+            - Accepts all required metadata from user to trigger jobs
+            - Client adin will able to say what all the different sources they need access into and how they want the data to be delivered
+            - Later clients can hit API by requesting for a job - they will pass metadata example, handler name, date range, keyword search, etc..
+        - Airflow side:
+            - Get all the job related details from app side & then trigger respective source and provide the data
+            - Each source will have its own schema, we will validate as per that [Json file] and push the data into silver layer
+
+        Trying to unify & automate the whole flow so that when a new source comes, then it should work seamlesly without much effort. Ofcourse airflow side work to set-up new APIs will be there but apart form that rest all should be automated.
+    
+    - Application:
+        - Internal tool to track/apply timesheet/vacation/burn reports, etc...
+
+My Plan:
+    - V1: Starting with MCP server with single agent, Docker with Fast API, PSQL Database, ORM queries
+    - V2: Later integrate Langgraph and use multiple agents. [Not needed as of now]
+    - V1 Details: [Currently planning to implement]
+        - I want to keep my model as:
+            - Client:
+                - ID
+                - name
+
+            - Project:
+                - ID
+                - name
+                - client: FK
+
+            - Source: <from where we have to fetch data, for example Insta, FB, Pinterest, etc>
+                - ID
+                - name
+
+            - Job: 1 project can multiple source and 1 source can also be part of many projects
+                - ID
+                - Project: FK
+                - source: FK
+                - date: YYYY-MM-DD
+                - status: [IN_PROGRESS, COMPLETED, FAILED]
+                - cost
+            
+
+        - Quick UI to accepts user message & should able to interact with him, also need capability to attach CSV/XLSX file and should be able to show graph(s)
+
+        - Task 1: Reporting at the tip of fingers for admin: with Fast API, PSQL Database, ORM queries capable
+            - currently storing what job, ran on what date, which source and how much is the cost[clinet-project-job-source-status-date-cost]
+            - I want to create an agent [May be SQL agent or ORM agent] which can access this table and provide the details based on clients query
+                - example questions: How many jobs ran by client A today and what is the total cost burnt on it ?
+                - which all jobs are currently under running state
+                - total cost for march month ? etc..
+            - May be in future i can integrate more models into and also i can show graph - dynamically plotted
+
+        
