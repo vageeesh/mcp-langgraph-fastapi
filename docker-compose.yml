@@ -1,3 +1,5 @@
+name: mcp_agentic
+
 services:
   api:
     build: .
