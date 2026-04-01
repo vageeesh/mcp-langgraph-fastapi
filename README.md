@@ -26,6 +26,8 @@ Client → FastAPI (v1 API) → Agent Runner → MCP Server → Tools (SQL, Repo
 
 - **API Versioning** — Routes are organized under `/api/v1/` for clean versioning and backward compatibility.
 
+- **Data Visualization** — The agent automatically detects when data is best presented visually and returns structured visualization metadata. The Streamlit UI renders **line charts** (trends over time), **bar charts** (category comparisons), and **tables** (detailed listings) inline in the chat. No extra endpoints needed — visualization data flows through the same streaming response.
+
 ## Scalability
 
 This architecture is horizontally scalable:
