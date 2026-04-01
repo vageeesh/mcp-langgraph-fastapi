@@ -1,5 +1,7 @@
+import os
 from agents import Runner
-from agents.mcp import MCPServerStdio
+from agents.mcp import MCPServerStreamableHttp
+
 from agents.stream_events import (
     RawResponsesStreamEvent, 
     RunItemStreamEvent, 
@@ -8,49 +10,10 @@ from agents.stream_events import (
 from app.agents.sql_agent import create_sql_agent
 from app.core.redis import RedisClient
 
+MCP_URL = os.getenv("MCP_SERVER_URL", "http://mcp-server:8001/mcp")
 
-async def run_sql_agent(query: str, session_id: str = "default"):
-    """Run SQL agent with given query and session ID for conversation history"""
-    # later change the sesion_id to be dynamic based on user or conversation context for better memory management
-    # In production, use MCPServerHTTP or a persistent connection to avoid startup overhead
-    # Always ensure the MCP server is running before executing this function in production
-    # example: mcp_server = MCPServerHTTP("http://localhost:8000/mcp")
-    # run like python mcp_server/server.py in a separate terminal
-    print(f"Query got from user is {query}")
-    
-    # Initialize Redis client
-    redis_client = RedisClient()
-    
-    mcp_server = MCPServerStdio(
-        params={
-            "command": "python",
-            "args": ["mcp_server/server.py"]
-        }
-    )
-
-    async with mcp_server as server:
-        # Create agent with MCP server
-        sql_agent = create_sql_agent(mcp_servers=[server])
-        
-        # Load conversation history from Redis (if needed)
-        history = redis_client.load_memory(session_id)
-        # Attach history to the input messages for the agent
-        input_messages = history + [
-            {"role": "user", "content": query}
-        ]
-        
-        result = await Runner.run(
-            sql_agent,
-            input_messages
-        )
-
-        print("Final output from agent:", result.final_output)
-        
-        # Save conversation turn to Redis
-        # To DO: later store metadata, like Query instead of current complete message and that can be used to improve accurecy and performence of agent in future interactions
-        redis_client.save_turn(session_id, query, result.final_output)
-
-        return result.final_output
+# Initialize once, reuse across requests
+mcp_server = MCPServerStreamableHttp(params={"url": MCP_URL})
 
 
 async def stream_sql_agent(query: str, session_id: str = "default"):
@@ -58,13 +21,6 @@ async def stream_sql_agent(query: str, session_id: str = "default"):
     print(f"Streaming query from user: {query}")
     
     redis_client = RedisClient()
-    
-    mcp_server = MCPServerStdio(
-        params={
-            "command": "python",
-            "args": ["mcp_server/server.py"]
-        }
-    )
 
     async with mcp_server as server:
         sql_agent = create_sql_agent(mcp_servers=[server])

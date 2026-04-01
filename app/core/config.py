@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     MAX_HISTORY: int
     REDIS_HOST: str
     REDIS_PORT: int
+    OPENAI_BASE_URL: str
 
     class Config:
         env_file = BASE_DIR / ".env"

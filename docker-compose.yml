@@ -14,8 +14,24 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - MCP_SERVER_URL=http://mcp-server:8001/mcp
     volumes:
       - .:/app
+
+  mcp-server:
+    build: .
+    command: python mcp_server/server.py
+    ports:
+      - "8001:8001"
+    # Health check to ensure the MCP server is running before the API tries to connect
+    # This will help prevent connection errors if the API starts before the MCP server is ready
+    # Checks on every 10 seconds, with a timeout of 5 seconds, and retries up to 3 times before marking the container as unhealthy
+
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8001/mcp"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 3
 
   db:
     image: postgres:15

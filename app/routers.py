@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from app.api.v1.router import router as v1_router
-from app.agents_runner.runner import run_sql_agent, stream_sql_agent
-import json
+from app.agents_runner.runner import stream_sql_agent
+
 
 api_router = APIRouter()
 
@@ -10,13 +10,6 @@ api_router.include_router(
     v1_router,
     prefix="/api/v1"
 )
-
-
-@api_router.post("/query")
-async def ask(query: dict):
-    result = await run_sql_agent(query["query"])
-    return {"output": result}
-
 
 @api_router.post("/query/stream")
 async def ask_stream(query: dict):

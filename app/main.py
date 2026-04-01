@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from app.routers import api_router
 
+
 app = FastAPI(
-    title="Agent Reporting API"
+    title="Agent Reporting API",
 )
 
 app.include_router(api_router)
